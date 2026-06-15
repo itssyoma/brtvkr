@@ -1,0 +1,12 @@
+{
+  "name": "college-journal-quality-tests",
+  "private": true,
+  "version": "1.2.0",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.59.1"
+  }
+}

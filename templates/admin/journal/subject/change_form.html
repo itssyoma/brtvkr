@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+    {% if original %}
+        <li>
+            <a class="addlink"
+               href="{% url 'admin:journal_teachingassignment_add' %}?subject={{ original.pk }}">
+                Назначить дисциплину
+            </a>
+        </li>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
+

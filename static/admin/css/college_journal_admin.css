@@ -1,0 +1,219 @@
+.related-widget-wrapper-link,
+.deletelink-box {
+    display: none !important;
+}
+
+.object-tools a.deletelink {
+    background-color: var(--delete-button-bg, #ba2121);
+}
+
+.object-tools a.deletelink:hover,
+.object-tools a.deletelink:focus {
+    background-color: var(--delete-button-hover-bg, #a41515);
+}
+
+.submit-row input[name="_save"] {
+    background: var(--button-bg, #417690);
+}
+
+.submit-row input[name="_save"]:hover,
+.submit-row input[name="_save"]:focus {
+    background: var(--button-hover-bg, #205067);
+}
+
+.assignment-delete-control,
+.inline-delete-control {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--delete-button-bg, #ba2121);
+    cursor: pointer;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 30px;
+}
+
+.assignment-delete-control:hover,
+.assignment-delete-control:focus-visible,
+.inline-delete-control:hover,
+.inline-delete-control:focus-visible {
+    background: var(--delete-button-bg, #ba2121);
+    color: #fff;
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.inline-related.is-marked-for-delete {
+    display: none;
+}
+
+.readonly {
+    overflow-wrap: anywhere;
+}
+
+.admin-section-list {
+    display: grid;
+    gap: 18px;
+}
+
+.admin-section {
+    overflow: hidden;
+    border: 1px solid var(--hairline-color);
+    background: var(--body-bg);
+}
+
+.admin-section h2 {
+    margin: 0;
+    padding: 10px 14px;
+    color: var(--header-link-color);
+    background: var(--primary);
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.admin-section a {
+    display: block;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--hairline-color);
+    color: var(--link-fg);
+    font-weight: 600;
+}
+
+.admin-section a:last-child {
+    border-bottom: 0;
+}
+
+.admin-section a:hover,
+.admin-section a:focus {
+    background: var(--darkened-bg);
+}
+
+.custom-admin-index {
+    max-width: 980px;
+}
+
+.admin-welcome {
+    padding: 6px 0 24px;
+    border-bottom: 1px solid var(--hairline-color);
+}
+
+.admin-welcome-label {
+    margin: 0 0 8px;
+    color: var(--body-quiet-color);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.admin-welcome h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.admin-welcome-text {
+    margin: 10px 0 0;
+    color: var(--body-quiet-color);
+    font-size: 17px;
+}
+
+.admin-dashboard-warning {
+    margin: 18px 0 0;
+    padding: 10px 12px;
+    color: #7a4b00;
+    background: #fff4d6;
+    border-left: 4px solid #d09a22;
+}
+
+.admin-dashboard-section {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--hairline-color);
+}
+
+.admin-dashboard-section h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+}
+
+.admin-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(130px, 1fr));
+    margin: 0;
+    border: 1px solid var(--hairline-color);
+}
+
+.admin-stat-grid div {
+    padding: 16px;
+    border-right: 1px solid var(--hairline-color);
+}
+
+.admin-stat-grid div:last-child {
+    border-right: 0;
+}
+
+.admin-stat-grid dt {
+    color: var(--body-quiet-color);
+    font-size: 12px;
+}
+
+.admin-stat-grid dd {
+    margin: 7px 0 0;
+    color: var(--body-fg);
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.admin-year-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    gap: 32px;
+}
+
+.admin-year-summary p {
+    margin: 0;
+}
+
+.admin-dashboard-note {
+    margin-top: 10px !important;
+    color: var(--body-quiet-color);
+    font-size: 12px;
+}
+
+#nav-sidebar .admin-section-list {
+    gap: 0;
+}
+
+#nav-sidebar .admin-section {
+    border-width: 0 0 1px;
+}
+
+#nav-sidebar .admin-section h2 {
+    padding: 9px 12px;
+    font-size: 11px;
+}
+
+#nav-sidebar .admin-section a {
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .admin-stat-grid {
+        grid-template-columns: repeat(2, minmax(130px, 1fr));
+    }
+
+    .admin-stat-grid div:nth-child(2) {
+        border-right: 0;
+    }
+
+    .admin-stat-grid div:nth-child(-n + 2) {
+        border-bottom: 1px solid var(--hairline-color);
+    }
+
+    .admin-year-summary {
+        grid-template-columns: 1fr;
+    }
+}

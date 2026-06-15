@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assignment.subject }} — Электронный журнал{% endblock %}
+{% block body_class %}journal-page{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <div>
+        <p class="eyebrow">
+            Группа {{ assignment.group }} · {{ assignment.academic_year }} ·
+            {{ assignment.get_semester_display }}
+        </p>
+        <h1 class="page-title">{{ assignment.subject }}</h1>
+    </div>
+    <div class="header-actions">
+        {% if can_edit and curriculum_items %}
+            <a class="secondary-action edit-journal-action"
+               href="{% url 'journal:curriculum_plan' assignment.pk %}">
+                Открыть КТП
+            </a>
+        {% elif can_edit and not is_archived %}
+            <a class="secondary-action edit-journal-action"
+               href="{% url 'journal:import_curriculum' assignment.pk %}">
+                Импортировать КТП
+            </a>
+        {% endif %}
+        <a class="secondary-action" href="{% url 'journal:dashboard' %}">Назад</a>
+    </div>
+</header>
+
+{% if is_archived %}
+    <div class="archive-notice">
+        Учебный год {{ assignment.academic_year }} закрыт и доступен только для просмотра.
+    </div>
+{% elif not can_edit %}
+    <div class="archive-notice">
+        Режим просмотра. Изменение данных журнала доступно только преподавателю дисциплины.
+    </div>
+{% endif %}
+
+<div class="journal-workspace">
+    <section class="summary-section">
+        <div class="section-heading-row">
+            <div>
+                <h2 class="section-title">Сводный журнал</h2>
+                <p class="section-note">
+                    Н — отсутствие, У — уважительная причина, О — опоздание
+                </p>
+            </div>
+            <div class="journal-toolbar">
+                <span class="record-count">{{ journal_rows|length }} студентов</span>
+                {% if is_archived %}
+                    <span class="record-count">Архив</span>
+                {% elif edit_mode %}
+                    <a class="secondary-action edit-journal-action"
+                       href="{% url 'journal:assignment_detail' assignment.pk %}">
+                        Отменить
+                    </a>
+                {% elif can_edit %}
+                    <a class="secondary-action edit-journal-action"
+                       href="{% url 'journal:assignment_detail' assignment.pk %}?edit=1">
+                        Изменить
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if journal_lessons and journal_rows %}
+            <form method="post"
+                  class="{% if edit_mode %}journal-edit-form{% endif %}"
+                  {% if edit_mode %}
+                      data-autosave-url="{% url 'journal:autosave_journal_cell' assignment.pk %}"
+                  {% endif %}>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save_journal">
+                {% if edit_mode %}
+                    <div class="audit-reason-panel" data-audit-panel hidden>
+                        {% include "journal/includes/audit_reason_fields.html" %}
+                    </div>
+                {% endif %}
+                <div class="table-wrap journal-table-wrap">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th class="student-column">Студент</th>
+                                {% for lesson in journal_lessons %}
+                                    <th class="lesson-column">
+                                        <a href="{% url 'journal:lesson_detail' lesson.pk %}"
+                                           title="{{ lesson.topic }}">
+                                            {{ lesson.date|date:"d.m" }}
+                                        </a>
+                                        {% if edit_mode %}
+                                            <span class="lesson-field-labels"
+                                                  aria-hidden="true">
+                                                <span>
+                                                    {% if lesson.grading_scheme == "pass_fail" %}
+                                                        Рез.
+                                                    {% elif lesson.grading_scheme == "none" %}
+                                                        —
+                                                    {% else %}
+                                                        Оц.
+                                                    {% endif %}
+                                                </span>
+                                                <span>Пос.</span>
+                                            </span>
+                                        {% endif %}
+                                    </th>
+                                {% endfor %}
+                                <th class="metric-column">Средний балл</th>
+                                <th class="metric-column">Пропуски</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in journal_rows %}
+                                <tr>
+                                    <td class="student-column">
+                                        <strong>{{ row.student }}</strong>
+                                        <small>{{ row.student.student_card_number }}</small>
+                                    </td>
+                                    {% for cell in row.cells %}
+                                        <td class="lesson-cell
+                                            {% if cell.attendance == 'absent' %}is-absent
+                                            {% elif cell.attendance == 'excused' %}is-excused
+                                            {% elif cell.attendance == 'late' %}is-late{% endif %}">
+                                            {% if edit_mode %}
+                                                <div class="cell-editors">
+                                                {% if cell.grading_scheme != "none" %}
+                                                <input
+                                                    class="grade-editor {% if cell.grading_scheme == 'pass_fail' %}pass-fail-editor{% endif %}"
+                                                    type="text"
+                                                    {% if cell.grading_scheme == "numeric" %}inputmode="numeric"{% endif %}
+                                                    maxlength="{% if cell.grading_scheme == 'pass_fail' %}2{% else %}1{% endif %}"
+                                                    name="grade_{{ row.student.pk }}_{{ cell.lesson.pk }}"
+                                                    value="{{ cell.grade_input }}"
+                                                    data-journal-field="grade"
+                                                    data-grading-scheme="{{ cell.grading_scheme }}"
+                                                    data-lesson="{{ cell.lesson.pk }}"
+                                                    data-student="{{ row.student.pk }}"
+                                                    data-original-value="{{ cell.grade_input }}"
+                                                    data-original-exists="{{ cell.grade_exists|yesno:'true,false' }}"
+                                                    autocomplete="off"
+                                                    aria-label="Оценка: {{ row.student }}, {{ cell.lesson.date|date:'d.m.Y' }}">
+                                                {% else %}
+                                                    <span class="no-grade-mark"
+                                                          title="Оценивание не предусмотрено">—</span>
+                                                {% endif %}
+                                                <input
+                                                    class="attendance-editor"
+                                                    type="text"
+                                                    maxlength="1"
+                                                    name="attendance_{{ row.student.pk }}_{{ cell.lesson.pk }}"
+                                                    value="{{ cell.attendance_mark }}"
+                                                    data-journal-field="attendance"
+                                                    data-lesson="{{ cell.lesson.pk }}"
+                                                    data-student="{{ row.student.pk }}"
+                                                    data-original-value="{{ cell.attendance_mark }}"
+                                                    data-original-exists="{{ cell.attendance_exists|yesno:'true,false' }}"
+                                                    autocomplete="off"
+                                                    aria-label="Посещаемость: {{ row.student }}, {{ cell.lesson.date|date:'d.m.Y' }}"
+                                                    title="Н — отсутствие, У — уважительная причина, О — опоздание">
+                                                </div>
+                                            {% elif cell.grade %}
+                                                <span class="grade {% if cell.grading_scheme == 'numeric' %}grade-{{ cell.grade }}{% else %}grade-pass{% endif %}">
+                                                    {{ cell.grade }}
+                                                </span>
+                                            {% endif %}
+                                            {% if cell.attendance_mark and not edit_mode %}
+                                                <small class="attendance-mark">
+                                                    {{ cell.attendance_mark }}
+                                                </small>
+                                            {% endif %}
+                                            {% if not edit_mode and not cell.grade and not cell.attendance_mark %}—{% endif %}
+                                        </td>
+                                    {% endfor %}
+                                    <td class="metric-column"
+                                        data-average-for="{{ row.student.pk }}">
+                                        {% if row.average != None %}
+                                            <strong>{{ row.average }}</strong>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td class="metric-column"
+                                        data-absence-for="{{ row.student.pk }}">
+                                        {{ row.absence_count }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if edit_mode %}
+                    <div class="journal-save-bar">
+                        <p>
+                            Оценки: 2–5; зачёт: З или НЗ. Посещаемость: Н, У, О.
+                            Пустое поле означает присутствие.
+                        </p>
+                        <span class="autosave-status"
+                              data-autosave-status
+                              aria-live="polite">
+                            Изменения сохраняются автоматически
+                        </span>
+                        <button class="primary-action" type="submit">
+                            Сохранить вручную
+                        </button>
+                    </div>
+                {% endif %}
+            </form>
+        {% else %}
+            <div class="empty-state compact">
+                <p>Сводный журнал появится после добавления занятия и студентов.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <aside class="lesson-sidebar">
+        {% if can_edit and not is_archived %}
+        <div class="sidebar-create">
+            <h2 class="section-title">Новое занятие</h2>
+            <form method="post" class="stacked-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_lesson">
+                {% if edit_mode %}
+                    <input type="hidden" name="return_to_edit" value="1">
+                {% endif %}
+                <label for="lesson-date">Дата</label>
+                <input id="lesson-date" name="date" type="date" value="{{ today }}" required>
+                <label for="lesson-topic">Тема занятия</label>
+                {% if curriculum_items %}
+                    <select id="lesson-topic" name="curriculum_item" required>
+                        <option value="">Выберите тему из КТП</option>
+                        {% for item in curriculum_items %}
+                            <option value="{{ item.pk }}"
+                                    data-planned-date="{{ item.planned_date|date:'Y-m-d' }}"
+                                    data-lesson-type="{{ item.lesson_type }}">
+                                {{ item.sequence }}. {{ item.topic }}
+                                · {{ item.get_lesson_type_display }}
+                                {% if item.is_used %} · проведено{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input id="lesson-topic" name="topic" maxlength="500" required>
+                {% endif %}
+                <button class="primary-action" type="submit">Добавить</button>
+            </form>
+        </div>
+
+        <div class="sidebar-divider"></div>
+        {% endif %}
+        <h2 class="section-title">Занятия</h2>
+        {% if lessons %}
+            <div class="data-list lesson-list">
+                {% for lesson in lessons %}
+                    <a href="{% url 'journal:lesson_detail' lesson.pk %}">
+                        <span>
+                            <strong>{{ lesson.topic }}</strong>
+                            <small>
+                                {{ lesson.date|date:"d.m.Y" }} ·
+                                {{ lesson.get_lesson_type_display }}
+                            </small>
+                        </span>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state compact">
+                <p>Занятий пока нет. Добавьте первое занятие.</p>
+            </div>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

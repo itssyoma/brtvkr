@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Удаление занятия — Электронный журнал{% endblock %}
+
+{% block content %}
+<section class="confirmation-page">
+    <p class="eyebrow">Подтверждение удаления</p>
+    <h1 class="page-title">Удалить занятие?</h1>
+
+    <div class="confirmation-details">
+        <strong>{{ lesson.topic }}</strong>
+        <span>
+            {{ lesson.date|date:"d.m.Y" }} ·
+            {{ lesson.assignment.subject }} ·
+            {{ lesson.assignment.group }}
+        </span>
+    </div>
+
+    <div class="warning-box">
+        <strong>Будут удалены:</strong>
+        <p>
+            занятие, все выставленные за него оценки и отметки посещаемости.
+            Тема КТП сохранится и снова получит статус «Запланировано».
+        </p>
+    </div>
+
+    <form method="post" class="confirmation-actions">
+        {% csrf_token %}
+        <div class="delete-reason-fields">
+            <label for="change-reason">Основание удаления</label>
+            <input id="change-reason"
+                   name="change_reason"
+                   maxlength="500"
+                   value="Удаление ошибочно созданного занятия"
+                   required>
+            <label for="change-comment">Комментарий</label>
+            <textarea id="change-comment"
+                      name="change_comment"
+                      rows="2"></textarea>
+        </div>
+        <a class="secondary-action edit-journal-action"
+           href="{% url 'journal:lesson_detail' lesson.pk %}">
+            Отмена
+        </a>
+        <button class="danger-action" type="submit">
+            Удалить занятие
+        </button>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — Электронный журнал{% endblock %}
+
+{% block content %}
+<section class="welcome">
+    <p class="eyebrow">Информационная система колледжа</p>
+    <h1>Электронный журнал</h1>
+    <p class="lead">
+        Учёт учебных групп, дисциплин, оценок и посещаемости в едином
+        веб-приложении.
+    </p>
+    {% if user.is_authenticated %}
+        <a class="primary-action" href="{% url 'journal:dashboard' %}">
+            Открыть журнал
+        </a>
+    {% else %}
+        <a class="primary-action" href="{% url 'login' %}">Войти в систему</a>
+    {% endif %}
+</section>
+
+<section class="module-grid" aria-label="Возможности системы">
+    <article>
+        <span class="module-number">01</span>
+        <h2>Учебные группы</h2>
+        <p>Состав групп и сведения о студентах.</p>
+    </article>
+    <article>
+        <span class="module-number">02</span>
+        <h2>Успеваемость</h2>
+        <p>Выставление и просмотр оценок по дисциплинам.</p>
+    </article>
+    <article>
+        <span class="module-number">03</span>
+        <h2>Посещаемость</h2>
+        <p>Регистрация присутствия студентов на занятиях.</p>
+    </article>
+</section>
+{% endblock %}

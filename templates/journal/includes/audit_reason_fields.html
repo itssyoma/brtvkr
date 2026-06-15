@@ -1,0 +1,31 @@
+<div class="audit-form-field">
+    <label for="change-reason">Основание изменений</label>
+    <select id="change-reason"
+            name="change_reason"
+            data-change-reason-select>
+        <option value="Исправление технической ошибки" selected>
+            Исправление технической ошибки
+        </option>
+        <option value="Исправление показателя успеваемости студента в лучшую сторону">
+            Исправление показателя успеваемости студента в лучшую сторону
+        </option>
+        <option value="__other__">Другое</option>
+    </select>
+</div>
+<div class="audit-form-field">
+    <label for="change-comment">Комментарий</label>
+    <textarea id="change-comment"
+              name="change_comment"
+              rows="2"
+              placeholder="Дополнительное пояснение"></textarea>
+</div>
+<div class="audit-form-field audit-other-reason"
+     data-other-reason-field
+     hidden>
+    <label for="change-reason-other">Другое основание</label>
+    <input id="change-reason-other"
+           name="change_reason_other"
+           maxlength="500"
+           data-change-reason-other
+           placeholder="Укажите основание изменения">
+</div>

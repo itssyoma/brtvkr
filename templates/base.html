@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Электронный журнал{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="{% static 'js/journal.js' %}" defer></script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header class="topbar">
+        <a class="brand" href="{% url 'journal:home' %}">
+            <span class="brand-mark">ЭЖ</span>
+            <span>Электронный журнал колледжа</span>
+        </a>
+        <nav aria-label="Основная навигация">
+            <a href="{% url 'journal:home' %}">Главная</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'journal:dashboard' %}">Дисциплины</a>
+                {% if user.is_staff %}<a href="/admin/">Управление</a>{% endif %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="nav-button" type="submit">Выйти</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Войти</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="page">
+        {% if messages %}
+            <div class="messages" aria-live="polite">
+                {% for message in messages %}
+                    <p class="{{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

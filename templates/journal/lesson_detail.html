@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.topic }} — Электронный журнал{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <div>
+        <p class="eyebrow">
+            {{ lesson.assignment.group }} · {{ lesson.date|date:"d.m.Y" }}
+        </p>
+        <h1 class="page-title">{{ lesson.topic }}</h1>
+        <p class="subject-label">
+            {{ lesson.assignment.subject }} · {{ lesson.get_lesson_type_display }}
+        </p>
+    </div>
+    <div class="header-actions">
+        {% if can_edit and not is_archived %}
+        <a class="secondary-action delete-lesson-action"
+           href="{% url 'journal:delete_lesson' lesson.pk %}">
+            Удалить занятие
+        </a>
+        {% endif %}
+        <a class="secondary-action"
+           href="{% url 'journal:assignment_detail' lesson.assignment.pk %}">
+            Назад
+        </a>
+    </div>
+</header>
+
+{% if is_archived %}
+    <div class="archive-notice">
+        Учебный год {{ lesson.assignment.academic_year }} закрыт. Данные занятия доступны только для просмотра.
+    </div>
+{% elif not can_edit %}
+    <div class="archive-notice">
+        Режим просмотра. Изменение данных занятия доступно только преподавателю дисциплины.
+    </div>
+{% endif %}
+
+<form method="post" data-audit-form>
+    {% csrf_token %}
+    {% if can_edit and not is_archived %}
+    <div class="audit-reason-panel" data-audit-panel hidden>
+        {% include "journal/includes/audit_reason_fields.html" %}
+    </div>
+    {% endif %}
+    <div class="table-wrap">
+        <table class="journal-table">
+            <thead>
+                <tr>
+                    <th>Студент</th>
+                    <th>Оценка</th>
+                    <th>Посещаемость</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td>
+                            <strong>{{ row.student }}</strong>
+                            <small>{{ row.student.student_card_number }}</small>
+                        </td>
+                        <td>
+                            {% if grading_scheme == "numeric" %}
+                                <select name="grade_{{ row.student.pk }}"
+                                        data-audit-field
+                                        data-original-value="{{ row.grade }}"
+                                        data-original-exists="{{ row.grade_exists|yesno:'true,false' }}"
+                                        {% if is_archived or not can_edit %}disabled{% endif %}
+                                        aria-label="Оценка: {{ row.student }}">
+                                    <option value="">—</option>
+                                    {% for value in "2345" %}
+                                        <option value="{{ value }}"
+                                            {% if row.grade|stringformat:"s" == value %}selected{% endif %}>
+                                            {{ value }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            {% elif grading_scheme == "pass_fail" %}
+                                <select name="grade_{{ row.student.pk }}"
+                                        data-audit-field
+                                        data-original-value="{{ row.grade }}"
+                                        data-original-exists="{{ row.grade_exists|yesno:'true,false' }}"
+                                        {% if is_archived or not can_edit %}disabled{% endif %}
+                                        aria-label="Результат зачёта: {{ row.student }}">
+                                    <option value="">—</option>
+                                    <option value="З" {% if row.grade == "З" %}selected{% endif %}>Зачёт</option>
+                                    <option value="НЗ" {% if row.grade == "НЗ" %}selected{% endif %}>Незачёт</option>
+                                </select>
+                            {% else %}
+                                <span class="no-grade-mark">Без оценки</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <select name="attendance_{{ row.student.pk }}"
+                                    data-audit-field
+                                    data-original-value="{{ row.attendance }}"
+                                    data-original-exists="{{ row.attendance_exists|yesno:'true,false' }}"
+                                    {% if is_archived or not can_edit %}disabled{% endif %}
+                                    aria-label="Посещаемость: {{ row.student }}">
+                                {% for value, label in attendance_choices %}
+                                    <option value="{{ value }}"
+                                        {% if row.attendance == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3">В группе пока нет студентов.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if can_edit and not is_archived %}
+    <div class="form-actions">
+        <button class="primary-action" type="submit">Сохранить журнал</button>
+    </div>
+    {% endif %}
+</form>
+{% endblock %}

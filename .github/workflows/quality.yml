@@ -1,0 +1,132 @@
+name: Quality checks
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  django-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Create environment configuration
+        run: cp .env.example .env
+
+      - name: Start application
+        run: docker compose up -d --build
+
+      - name: Run Django tests
+        run: >
+          docker compose exec -T web
+          python manage.py test --settings=config.settings_test
+
+      - name: Stop application
+        if: always()
+        run: docker compose down -v
+
+  browser-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Create environment configuration
+        run: cp .env.example .env
+
+      - name: Start application
+        run: docker compose up -d --build
+
+      - name: Wait for application
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+
+      - name: Create browser test data
+        run: docker compose exec -T web python manage.py seed_demo
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install browser test dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run cross-browser tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Stop application
+        if: always()
+        run: docker compose down -v
+
+  security-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Create environment configuration
+        run: cp .env.example .env
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install security tools
+        run: pip install -r requirements-quality.txt
+
+      - name: Scan Python source
+        run: >
+          bandit -r journal config
+          -x journal/tests.py,journal/migrations,journal/management/commands/seed_demo.py
+          -ll
+
+      - name: Audit Python dependencies
+        run: pip-audit -r requirements.txt
+
+      - name: Build application image
+        run: docker compose build web
+
+      - name: Check production security settings
+        run: |
+          docker compose run --rm --no-deps \
+            --entrypoint python \
+            -e DEBUG=0 \
+            -e SECRET_KEY=ci-only-secret-key-with-more-than-fifty-characters-123456789 \
+            -e ALLOWED_HOSTS=journal.example.test \
+            -e CSRF_TRUSTED_ORIGINS=https://journal.example.test \
+            -e SECURE_SSL_REDIRECT=1 \
+            -e SESSION_COOKIE_SECURE=1 \
+            -e CSRF_COOKIE_SECURE=1 \
+            -e SECURE_HSTS_SECONDS=31536000 \
+            -e SECURE_HSTS_INCLUDE_SUBDOMAINS=1 \
+            -e SECURE_HSTS_PRELOAD=1 \
+            web manage.py check --deploy --fail-level WARNING

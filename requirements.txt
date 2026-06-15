@@ -1,0 +1,8 @@
+--index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+Django==5.2.15
+mysqlclient==2.2.7
+gunicorn==23.0.0
+whitenoise>=6.8,<7
+openpyxl>=3.1,<4
+reportlab>=4.2,<5

@@ -1,0 +1,12 @@
+{% load i18n %}
+
+<button class="sticky toggle-nav-sidebar"
+        id="toggle-nav-sidebar"
+        aria-label="Переключить навигацию"></button>
+<nav class="sticky" id="nav-sidebar" aria-label="Боковая панель">
+    <input type="search"
+           id="nav-filter"
+           placeholder="Фильтр навигации"
+           aria-label="Фильтр элементов навигации">
+    {% include "admin/custom_sections.html" with navigation_compact=True %}
+</nav>

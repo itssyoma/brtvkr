@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Дисциплины — Электронный журнал{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <div>
+        <p class="eyebrow">Рабочий кабинет</p>
+        <h1 class="page-title">Дисциплины</h1>
+    </div>
+    <p class="user-label">{{ user_display_name }}</p>
+</header>
+
+{% if assignments %}
+    <h2 class="dashboard-section-title">Мои дисциплины</h2>
+    <section class="data-list">
+        {% for assignment in assignments %}
+            <a href="{% url 'journal:assignment_detail' assignment.pk %}">
+                <span>
+                    <strong>{{ assignment.subject }}</strong>
+                    <small>
+                        Группа {{ assignment.group }} ·
+                        {{ assignment.academic_year }} ·
+                        {{ assignment.get_semester_display }}
+                    </small>
+                </span>
+                <span class="row-action">Открыть →</span>
+            </a>
+        {% endfor %}
+    </section>
+{% elif not curated_assignments and not oversight_assignments %}
+    <section class="empty-state">
+        <h2>Учебная нагрузка пока не назначена</h2>
+        <p>Администратор должен связать преподавателя, группу и дисциплину.</p>
+    </section>
+{% endif %}
+
+{% if curated_assignments %}
+    <h2 class="dashboard-section-title">Дисциплины в курируемых группах</h2>
+    <section class="data-list curated-assignment-list">
+        {% for assignment in curated_assignments %}
+            <a href="{% url 'journal:assignment_detail' assignment.pk %}">
+                <span>
+                    <strong>{{ assignment.subject }}</strong>
+                    <small>
+                        Группа {{ assignment.group }} ·
+                        {{ assignment.academic_year }} ·
+                        {{ assignment.get_semester_display }} ·
+                        преподаватель {{ assignment.teacher_display_name }}
+                    </small>
+                </span>
+                <span class="row-action">Посмотреть →</span>
+            </a>
+        {% endfor %}
+    </section>
+{% endif %}
+
+{% if oversight_assignments %}
+    <h2 class="dashboard-section-title">Все журналы колледжа</h2>
+    <section class="data-list curated-assignment-list">
+        {% for assignment in oversight_assignments %}
+            <a href="{% url 'journal:assignment_detail' assignment.pk %}">
+                <span>
+                    <strong>{{ assignment.subject }}</strong>
+                    <small>
+                        Группа {{ assignment.group }} ·
+                        {{ assignment.academic_year }} ·
+                        {{ assignment.get_semester_display }} ·
+                        преподаватель {{ assignment.teacher_display_name }}
+                    </small>
+                </span>
+                <span class="row-action">Посмотреть →</span>
+            </a>
+        {% endfor %}
+    </section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Главная</a>
+    &rsaquo;
+    <a href="{{ changelist_url }}">Студенты</a>
+    &rsaquo; Импорт из XLSX
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module aligned">
+        <h2>Формат таблицы</h2>
+        <div class="form-row">
+            <p>
+                Первая строка должна содержать заголовки:
+                <strong>Фамилия</strong>, <strong>Имя</strong>,
+                <strong>Отчество</strong>,
+                <strong>Номер студенческого билета</strong>,
+                <strong>Обучается</strong>.
+            </p>
+            <p>
+                Поля «Отчество» и «Обучается» необязательны.
+                Если поле «Обучается» пустое, студент считается обучающимся.
+            </p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <fieldset class="module aligned">
+            {% for field in form %}
+                <div class="form-row{% if field.errors %} errors{% endif %}">
+                    {{ field.errors }}
+                    <div>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="help">{{ field.help_text }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </fieldset>
+        <div class="submit-row">
+            <input type="submit" value="Импортировать" class="default">
+            <a class="closelink" href="{{ changelist_url }}">Отменить</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

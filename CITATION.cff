@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "При использовании материалов для академической проверки укажите автора и этот репозиторий."
+title: "Электронный журнал колледжа"
+type: software
+authors:
+  - family-names: "Баратов"
+    given-names: "Семён"
+    alias: "itssyoma"
+version: "1.2.0"
+date-released: "2026-06-09"
+repository-code: "https://github.com/itssyoma/brtvkr"
+url: "https://github.com/itssyoma/brtvkr"
+license: "LicenseRef-Academic-Review-Only"
+abstract: >-
+  Веб-приложение электронного журнала колледжа, разработанное на Python,
+  Django и MySQL с контейнерным развертыванием Docker.

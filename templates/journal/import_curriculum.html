@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Импорт КТП — Электронный журнал{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <div>
+        <p class="eyebrow">
+            {{ assignment.group }} · {{ assignment.academic_year }} ·
+            {{ assignment.get_semester_display }}
+        </p>
+        <h1 class="page-title">Импорт КТП</h1>
+        <p class="subject-label">{{ assignment.subject }}</p>
+    </div>
+    <a class="secondary-action"
+       href="{% url 'journal:assignment_detail' assignment.pk %}">
+        Назад
+    </a>
+</header>
+
+{% if is_archived %}
+    <div class="archive-notice">
+        Учебный год {{ assignment.academic_year }} закрыт. Импорт КТП недоступен.
+    </div>
+{% else %}
+<section class="import-panel">
+    <form method="post" enctype="multipart/form-data" class="upload-form">
+        {% csrf_token %}
+        <label for="curriculum-file">Файл КТП в формате Excel</label>
+        <input id="curriculum-file"
+               type="file"
+               name="curriculum_file"
+               accept=".xlsx"
+               required>
+        <button class="primary-action" type="submit">Проверить файл</button>
+    </form>
+</section>
+{% endif %}
+
+{% if preview and not is_archived %}
+    <section class="import-preview">
+        <div class="section-heading-row">
+            <div>
+                <h2 class="section-title">Предварительный просмотр</h2>
+                <p class="section-note">{{ preview.filename }}</p>
+            </div>
+            <span class="record-count">
+                {{ preview.items|length }} записей · {{ preview.total_hours }} ч.
+            </span>
+        </div>
+
+        <div class="table-wrap curriculum-preview-wrap">
+            <table class="curriculum-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Тема</th>
+                        <th>Вид занятия</th>
+                        <th>Часы</th>
+                        <th>Дата</th>
+                        <th>Литература</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in preview.items %}
+                        <tr>
+                            <td>{{ item.sequence }}</td>
+                            <td>{{ item.topic }}</td>
+                            <td>{{ item.lesson_type_label }}</td>
+                            <td>{{ item.hours }}</td>
+                            <td>{{ item.planned_date|default:"—" }}</td>
+                            <td>{{ item.literature|default:"—" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <form method="post" class="import-confirm">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="confirm">
+            <p>
+                Существующие строки обновятся по номеру, новые будут добавлены.
+            </p>
+            <button class="primary-action" type="submit">
+                Импортировать КТП
+            </button>
+        </form>
+    </section>
+{% endif %}
+{% endblock %}

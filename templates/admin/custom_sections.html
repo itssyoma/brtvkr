@@ -1,0 +1,71 @@
+<div class="admin-section-list{% if navigation_compact %} is-compact{% endif %}">
+    {% if perms.journal.view_collegeinformation or perms.journal.change_collegeinformation %}
+    <section class="admin-section">
+        <h2>Основное</h2>
+        <a href="{% url 'admin:journal_collegeinformation_changelist' %}">
+            Сведения об образовательной организации
+        </a>
+    </section>
+    {% endif %}
+
+    <section class="admin-section">
+        <h2>Электронный журнал</h2>
+        {% if perms.journal.view_subject or perms.journal.change_subject %}
+            <a href="{% url 'admin:journal_subject_changelist' %}">Дисциплины</a>
+        {% endif %}
+        {% if perms.journal.view_teachingassignment or perms.journal.change_teachingassignment %}
+            <a href="{% url 'admin:journal_teachingassignment_changelist' %}">Назначения дисциплин</a>
+        {% endif %}
+        {% if perms.journal.view_curriculumplanitem or perms.journal.change_curriculumplanitem %}
+            <a href="{% url 'admin:journal_curriculumplanitem_changelist' %}">Темы КТП</a>
+        {% endif %}
+        {% if perms.journal.view_lesson or perms.journal.change_lesson %}
+            <a href="{% url 'admin:journal_lesson_changelist' %}">Занятия</a>
+        {% endif %}
+        {% if perms.journal.view_grade or perms.journal.change_grade %}
+            <a href="{% url 'admin:journal_grade_changelist' %}">Оценки</a>
+        {% endif %}
+        {% if perms.journal.view_attendance or perms.journal.change_attendance %}
+            <a href="{% url 'admin:journal_attendance_changelist' %}">Посещаемость</a>
+        {% endif %}
+        {% if perms.journal.view_journalchangelog %}
+            <a href="{% url 'admin:journal_journalchangelog_changelist' %}">Журнал изменений</a>
+        {% endif %}
+    </section>
+
+    <section class="admin-section">
+        <h2>Студенты</h2>
+        {% if perms.journal.view_student or perms.journal.change_student %}
+            <a href="{% url 'admin:journal_student_changelist' %}">Студенты</a>
+        {% endif %}
+        {% if perms.journal.view_studygroup or perms.journal.change_studygroup %}
+            <a href="{% url 'admin:journal_studygroup_changelist' %}">Учебные группы</a>
+        {% endif %}
+    </section>
+
+    {% if perms.journal.view_academicyeararchive or perms.journal.change_academicyeararchive %}
+    <section class="admin-section">
+        <h2>Учебные годы и архив</h2>
+        <a href="{% url 'admin:journal_academicyeararchive_changelist' %}">
+            Учебные годы
+        </a>
+        {% if perms.journal.view_academicyeararchiveevent %}
+            <a href="{% url 'admin:journal_academicyeararchiveevent_changelist' %}">
+                История архива
+            </a>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    {% if perms.auth.view_group or perms.auth.view_user %}
+    <section class="admin-section">
+        <h2>Пользователи и группы</h2>
+        {% if perms.auth.view_group %}
+            <a href="{% url 'admin:auth_group_changelist' %}">Группы</a>
+        {% endif %}
+        {% if perms.auth.view_user %}
+            <a href="{% url 'admin:auth_user_changelist' %}">Пользователи</a>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>

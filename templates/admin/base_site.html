@@ -1,0 +1,16 @@
+{% extends "admin/base.html" %}
+{% load static journal_admin %}
+
+{% block welcome-msg %}
+    Добро пожаловать, <strong>{{ user|full_user_name }}</strong>.
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/css/college_journal_admin.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static 'admin/js/college_journal_admin.js' %}" defer></script>
+{% endblock %}

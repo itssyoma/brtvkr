@@ -1,0 +1,70 @@
+<section class="admin-welcome">
+    <p class="admin-welcome-label">Электронный журнал</p>
+    <h1>
+        {% if college %}
+            {{ college.name }}
+        {% else %}
+            Образовательная организация
+        {% endif %}
+    </h1>
+    <p class="admin-welcome-text">
+        Добро пожаловать, {{ display_name }}!
+    </p>
+    <p class="admin-dashboard-note">
+        Версия системы: {{ app_version|default:"1.2.0" }}
+    </p>
+    {% if not college %}
+        <p class="admin-dashboard-warning">
+            Сведения об образовательной организации пока не заполнены.
+        </p>
+    {% endif %}
+</section>
+
+<section class="admin-dashboard-section">
+    <h2>Состояние электронного журнала</h2>
+    <dl class="admin-stat-grid">
+        <div>
+            <dt>Студентов</dt>
+            <dd>{{ student_count }}</dd>
+        </div>
+        <div>
+            <dt>Учебных групп</dt>
+            <dd>{{ group_count }}</dd>
+        </div>
+        <div>
+            <dt>Назначений дисциплин</dt>
+            <dd>{{ assignment_count }}</dd>
+        </div>
+        <div>
+            <dt>Проведённых занятий</dt>
+            <dd>{{ lesson_count }}</dd>
+        </div>
+    </dl>
+</section>
+
+<section class="admin-dashboard-section admin-year-summary">
+    <div>
+        <h2>Открытые учебные годы</h2>
+        {% if open_years %}
+            <p>
+                {% for year in open_years %}
+                    <strong>{{ year.academic_year }}</strong>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        {% else %}
+            <p>Нет открытых учебных годов.</p>
+        {% endif %}
+    </div>
+    <div>
+        <h2>Архив</h2>
+        <p>Закрытых учебных лет: <strong>{{ archived_year_count }}</strong></p>
+        {% if last_archive_event %}
+            <p class="admin-dashboard-note">
+                Последнее действие:
+                {{ last_archive_event.get_action_display|lower }},
+                {{ last_archive_event.archive.academic_year }},
+                {{ last_archive_event.created_at|date:"d.m.Y H:i" }}.
+            </p>
+        {% endif %}
+    </div>
+</section>

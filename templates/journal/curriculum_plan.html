@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}КТП — {{ assignment.subject }}{% endblock %}
+{% block body_class %}journal-page{% endblock %}
+
+{% block content %}
+<header class="section-header">
+    <div>
+        <p class="eyebrow">
+            {{ assignment.group }} · {{ assignment.academic_year }} ·
+            {{ assignment.get_semester_display }}
+        </p>
+        <h1 class="page-title">КТП</h1>
+        <p class="subject-label">{{ assignment.subject }}</p>
+    </div>
+    <div class="header-actions">
+        {% if not is_archived %}
+        <a class="secondary-action edit-journal-action"
+           href="{% url 'journal:import_curriculum' assignment.pk %}">
+            Импортировать заново
+        </a>
+        {% endif %}
+        <a class="secondary-action"
+           href="{% url 'journal:assignment_detail' assignment.pk %}">
+            Назад к журналу
+        </a>
+    </div>
+</header>
+
+{% if is_archived %}
+    <div class="archive-notice">
+        Учебный год {{ assignment.academic_year }} закрыт. КТП доступен только для просмотра.
+    </div>
+{% endif %}
+
+<section class="curriculum-editor">
+    <div class="section-heading-row">
+        <div>
+            <h2 class="section-title">Тематический план</h2>
+            <p class="section-note">
+                Проведённые темы можно редактировать, но нельзя удалить.
+            </p>
+        </div>
+        {% if not is_archived %}
+        <form method="post" class="curriculum-add-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add">
+            <label for="insert-sequence">Номер новой строки</label>
+            <input id="insert-sequence"
+                   type="number"
+                   name="insert_sequence"
+                   min="1"
+                   max="{{ next_sequence }}"
+                   value="{{ next_sequence }}"
+                   required>
+            <button class="secondary-action edit-journal-action button-link"
+                    type="submit">
+                Добавить строку
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="save">
+        <div class="table-wrap curriculum-editor-wrap">
+            <table class="curriculum-table curriculum-edit-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Плановая дата</th>
+                        <th>Фактическая дата</th>
+                        <th>Тема</th>
+                        <th>Вид занятия</th>
+                        <th>Часы</th>
+                        <th>Литература</th>
+                        <th>Статус</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td>
+                                <input type="number"
+                                       class="sequence-input"
+                                       min="1"
+                                       name="sequence_{{ item.pk }}"
+                                       value="{{ item.sequence }}"
+                                       {% if is_archived %}disabled{% endif %}
+                                       required>
+                            </td>
+                            <td>
+                                <input type="date"
+                                       name="planned_date_{{ item.pk }}"
+                                       {% if is_archived %}disabled{% endif %}
+                                       value="{{ item.planned_date|date:'Y-m-d' }}">
+                            </td>
+                            <td class="actual-date-cell">
+                                {% for actual_date in item.actual_dates %}
+                                    <span>{{ actual_date|date:"d.m.Y" }}</span>
+                                {% empty %}
+                                    <span>—</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <textarea name="topic_{{ item.pk }}"
+                                          rows="2"
+                                          {% if is_archived %}disabled{% endif %}
+                                          required>{{ item.topic }}</textarea>
+                            </td>
+                            <td>
+                                <select name="lesson_type_{{ item.pk }}"
+                                        {% if is_archived %}disabled{% endif %}>
+                                    {% for value, label in lesson_type_choices %}
+                                        <option value="{{ value }}"
+                                            {% if item.lesson_type == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number"
+                                       min="0.25"
+                                       step="0.25"
+                                       name="hours_{{ item.pk }}"
+                                       {% if is_archived %}disabled{% endif %}
+                                       value="{{ item.hours|stringformat:'g' }}"
+                                       required>
+                            </td>
+                            <td>
+                                <textarea name="literature_{{ item.pk }}"
+                                          {% if is_archived %}disabled{% endif %}
+                                          rows="2">{{ item.literature }}</textarea>
+                            </td>
+                            <td>
+                                {% if item.is_used %}
+                                    <span class="curriculum-status is-complete">
+                                        Проведено
+                                    </span>
+                                {% else %}
+                                    <span class="curriculum-status">
+                                        Запланировано
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="curriculum-delete-cell">
+                                {% if not item.is_used and not is_archived %}
+                                    <button type="submit"
+                                            class="curriculum-delete"
+                                            formaction="{% url 'journal:delete_curriculum_item' assignment.pk item.pk %}"
+                                            formmethod="post"
+                                            onclick="return confirm('Удалить эту строку КТП?')"
+                                            title="Удалить строку"
+                                            aria-label="Удалить строку">×</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9">КТП пока не содержит строк.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if items and not is_archived %}
+            <div class="curriculum-actions">
+                <button class="primary-action" type="submit">
+                    Сохранить изменения
+                </button>
+            </div>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}

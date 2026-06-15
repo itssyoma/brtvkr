@@ -1,0 +1,16 @@
+services:
+  locust:
+    image: locustio/locust:2.32.4
+    environment:
+      LOAD_USERNAME: ${LOAD_USERNAME:-teacher}
+      LOAD_PASSWORD: ${LOAD_PASSWORD:-teacher12345}
+    volumes:
+      - ./quality/load:/mnt/locust:ro
+      - ./quality/results:/results
+    command:
+      - -f
+      - /mnt/locust/locustfile.py
+      - --host
+      - http://web:8000
+    depends_on:
+      - web
