@@ -18,17 +18,14 @@ jobs:
       - name: Create environment configuration
         run: cp .env.example .env
 
-      - name: Start application
-        run: docker compose up -d --build
+      - name: Build application image
+        run: docker compose build web
 
       - name: Run Django tests
-        run: >
-          docker compose exec -T web
-          python manage.py test --settings=config.settings_test
-
-      - name: Stop application
-        if: always()
-        run: docker compose down -v
+        run: |
+          docker compose run --rm --no-deps \
+            --entrypoint python \
+            web manage.py test --settings=config.settings_test
 
   browser-tests:
     runs-on: ubuntu-latest
